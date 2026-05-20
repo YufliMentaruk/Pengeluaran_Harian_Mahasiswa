@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Expense Analyzer</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      margin: 24px;
+      max-width: 800px;
+    }
+
+    input, button {
+      padding: 8px;
+      margin: 4px;
+    }
+
+    #list,
+    #result,
+    #imageStatus {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-top: 10px;
+      white-space: pre-line;
+    }
+
+    img {
+      max-width: 300px;
+      margin-top: 12px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Student Expense Analyzer</h1>
+
+<p>
+  Masukkan pengeluaran harian mahasiswa untuk dianalisis AI.
+</p>
+
+<input id="item" placeholder="contoh: makan, transport">
+<input id="money" type="number" placeholder="jumlah pengeluaran">
+
+<button onclick="tambah()">Tambah</button>
+<button onclick="analisis()">Analisis AI</button>
+
+<p id="total">Total Pengeluaran: Rp 0</p>
+
+<h2>Daftar Pengeluaran:</h2>
+
+<div id="list">
+  Belum ada data
+</div>
+
+<h2>Analisis AI:</h2>
+
+<div id="result">
+  Belum dianalisis
+</div>
+
+<h2>Generate Karakter Sesuai Pengeluaran:</h2>
+
+<button onclick="generateImage()">
+  Generate Gambar
+</button>
+
+<div id="imageStatus">
+  Belum ada gambar.
+</div>
+
+<img id="aiImage">
+
+<script>
+
+let data = [];
+
+/* =========================
+   RENDER DATA
+========================= */
+
+function render() {
+
+  let total = 0;
+  let text = "";
+
+  data.forEach((d, i) => {
+
+    total += d.uang;
+
+    text +=
+      (i + 1) + ". " +
+      d.nama +
+      " - Rp " +
+      d.uang.toLocaleString("id-ID") +
+      "\n";
+  });
+
+  document.getElementById("total").innerText =
+    "Total Pengeluaran: Rp " +
+    total.toLocaleString("id-ID");
+
+  document.getElementById("list").innerText =
+    text || "Belum ada data";
+}
+
+/* =========================
+   TAMBAH DATA
+========================= */
+
+function tambah() {
+
+  const nama =
+    document.getElementById("item").value.trim();
+
+  const uang =
+    Number(document.getElementById("money").value);
+
+  if (!nama || !uang) {
+    alert("Isi data dengan benar");
+    return;
+  }
+
+  data.push({
+    nama: nama,
+    uang: uang
+  });
+
+  document.getElementById("item").value = "";
+  document.getElementById("money").value = "";
+
+  render();
+}
+
+/* =========================
+   ANALISIS AI
+========================= */
+
+async function analisis() {
+
+  if (data.length === 0) {
+    alert("Masukkan data terlebih dahulu");
+    return;
+  }
+
+  document.getElementById("result").innerText =
+    "Menganalisis pengeluaran...";
+
+  const daftar = data.map((d, i) =>
+
+    (i + 1) + ". " +
+    d.nama +
+    " - Rp " +
+    d.uang
+
+  ).join("\n");
+
+  /* =========================
+     ANALISIS MANUAL
+  ========================= */
+
+  let total = 0;
+
+  data.forEach(d => {
+    total += d.uang;
+  });
+
+  let kategori = "";
+  let saran = "";
+
+  if (total < 50000) {
+
+    kategori = "Hemat";
+
+    saran =
+      "Pengeluaran harian masih sangat baik dan terkontrol.";
+
+  } else if (total < 150000) {
+
+    kategori = "Sedang";
+
+    saran =
+      "Pengeluaran cukup normal, namun tetap perlu pengelolaan.";
+
+  } else {
+
+    kategori = "Boros";
+
+    saran =
+      "Pengeluaran cukup tinggi. Disarankan mengurangi pengeluaran tidak penting.";
+
+  }
+
+  document.getElementById("result").innerText =
+
+    "Kategori Pengeluaran : " + kategori + "\n\n" +
+
+    "Total Pengeluaran : Rp " +
+    total.toLocaleString("id-ID") + "\n\n" +
+
+    "Saran AI : " + saran + "\n\n" +
+
+    "Detail Pengeluaran:\n" +
+    daftar;
+}
+
+/* =========================
+   GENERATE GAMBAR
+========================= */
+
+function generateImage() {
+
+  if (data.length === 0) {
+
+    document.getElementById("imageStatus").innerText =
+      "Masukkan data terlebih dahulu.";
+
+    return;
+  }
+
+  document.getElementById("imageStatus").innerText =
+    "Membuat karakter...";
+
+  const img =
+    document.getElementById("aiImage");
+
+  /* =========================
+     PILIH GAMBAR BERDASARKAN
+     TOTAL PENGELUARAN
+  ========================= */
+
+  let total = 0;
+
+  data.forEach(d => {
+    total += d.uang;
+  });
+
+  let imageUrl = "";
+
+  if (total < 50000) {
+
+    imageUrl =
+      "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+    document.getElementById("imageStatus").innerText =
+      "Karakter mahasiswa hemat berhasil dibuat.";
+
+  } else if (total < 150000) {
+
+    imageUrl =
+      "https://cdn-icons-png.flaticon.com/512/4140/4140048.png";
+
+    document.getElementById("imageStatus").innerText =
+      "Karakter mahasiswa normal berhasil dibuat.";
+
+  } else {
+
+    imageUrl =
+      "https://cdn-icons-png.flaticon.com/512/1995/1995574.png";
+
+    document.getElementById("imageStatus").innerText =
+      "Karakter mahasiswa boros berhasil dibuat.";
+  }
+
+  img.src = imageUrl;
+  img.style.display = "block";
+}
+
+render();
+
+</script>
+
+</body>
+</html>
